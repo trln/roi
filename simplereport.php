@@ -1,4 +1,6 @@
 <?php
+
+	//Info for roi_user test account
 	$dbhost = "localhost";
 	$dbuser = "roi_user";
 	$dbpass = "FlyingBottleStickyNote";
@@ -187,17 +189,21 @@
 		<?php 
 			print_r($_GET);
 			echo "</br>";
-			$query = "SELECT Sum(TRLN_Cost) AS 'Total TRLN Cost', TRLN_Year AS 'TRLN Year', Provs.SERSOL_ProvName 'Provider Name' FROM loc_trln_costs AS Costs
+			//Base MySQL query string
+			$query = "SELECT Sum(TRUNCATE(TRLN_Cost, 2)) AS 'Total TRLN Cost', TRLN_Year AS 'TRLN Year', Provs.SERSOL_ProvName 'Provider Name' FROM loc_trln_costs AS Costs
 			JOIN loc_sersol_databases AS Dbs
 				ON Costs.SERSOL_DBCode = Dbs.SERSOL_DBCode
 			JOIN loc_sersol_providers As Provs
 				ON Dbs.SERSOL_ProvID = Provs.SERSOL_ProvID";
+			//Parameter input for query, select by year
 			if($_GET['endYear'] - $_GET['startYear'] >= 0) {
 				$query .= " WHERE TRLN_Year >= {$_GET['startYear']} AND TRLN_Year <= {$_GET['endYear']}";
+				//Parameter input for query, select by provider
 				if($_GET['provider'] != "all") {
 					$query .= " AND Provs.SERSOL_ProvName = '{$_GET['provider']}'";
 				}
 				$query .= " GROUP BY TRLN_Year, Provs.SERSOL_ProvName";
+				//Parameter input for query, select by cost
 				if($_GET['minCost'] == '') {
 					if(is_numeric($_GET['maxCost'])) {
 						$query .= " HAVING Sum(TRLN_Cost) <= {$_GET['maxCost']}";
