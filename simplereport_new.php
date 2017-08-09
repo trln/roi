@@ -1,7 +1,7 @@
 <?php
 
 	try {
-		require_once "../includes/dbtools.php";
+		require_once "includes/dbtools.php";
 	} catch(Exception $e) {
 		$error = $e->getMessage();
 	}
@@ -78,32 +78,34 @@
 	
 		<?php 
 		if($_GET) {
+			
+			$startYear = check($_GET['startYear'], true, $db);
+			$endYear = check($_GET['endYear'], true, $db);
+			$minCost = check($_GET['minCost'], true, $db);
+			$maxCost = check($_GET['maxCost'], true, $db);
+			$provider = check($_GET['provider'], false, $db);
+			//echo($startYear . " " . $endYear . " " . $minCost . " " . $maxCost . " " . $provider . "</br>");
+			
 			//Base MySQL query string
 			$query = "SELECT * FROM totalsummaryconsortium";
 			//Parameter input for query, select by year
-			if($_GET['endYear'] - $_GET['startYear'] >= 0) {
-				$query .= " WHERE TRLN_Year >= {$_GET['startYear']} AND TRLN_Year <= {$_GET['endYear']}";
+			if($endYear - $startYear >= 0) {
+				$query .= " WHERE TRLN_Year >= {$startYear} AND TRLN_Year <= {$endYear}";
 				//Parameter input for query, select by provider
-				if($_GET['provider'] != "All providers") {
-					$query .= " AND SERSOL_ProvName = '{$_GET['provider']}'";
+				if($provider != "All providers") {
+					$query .= " AND SERSOL_ProvName = '{$provider}'";
 				}
 				//Parameter input for query, select by cost
-				if($_GET['minCost'] == '') {
-					if(is_numeric($_GET['maxCost'])) {
-						$query .= " HAVING Total_TRLN_Cost <= {$_GET['maxCost']}";
-					} else if($_GET['maxCost'] != '') {
-						die("Invalid cost input. Range invalid or non-number.");
-					}
-				} else if($_GET['maxCost'] == '') {
-					if(is_numeric($_GET['minCost'])) {
-						$query .= " HAVING Total_TRLN_Cost >= {$_GET['minCost']}";
-					} else {
-						die("Invalid cost input. Range invalid or non-number.");
-					}
-				} else if((is_numeric($_GET['maxCost']) && is_numeric($_GET['minCost'])) && $_GET['maxCost'] - $_GET['minCost'] >= 0) {
-					$query .= " HAVING Total_TRLN_Cost >= {$_GET['minCost']} AND Total_TRLN_Cost <= {$_GET['maxCost']}";
+				if($minCost == '' && $maxCost == '') {
+					//do nothing
+				} else if($minCost == '' && $maxCost != '') {
+					$query .= " HAVING Total_TRLN_Cost <= {$maxCost}";
+				} else if($minCost != '' && $maxCost == '') {
+					$query .= " HAVING Total_TRLN_Cost >= {$minCost}";
+				} else if($maxCost - $minCost >= 0) {
+					$query .= " HAVING Total_TRLN_Cost >= {$minCost} AND Total_TRLN_Cost <= {$maxCost}";
 				} else {
-					die("Invalid cost input. Range invalid or non-number.");
+					die("Invalid cost range.");
 				}
 				$query .= " ORDER BY TRLN_Year DESC";
 			} else {

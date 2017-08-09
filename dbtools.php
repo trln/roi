@@ -1,10 +1,10 @@
 <?php
 	//Info for roi_user test account
 	//TODO: Switch to env variables
-	$dbhost = "localhost";
-	$dbuser = "roi_user";
-	$dbpass = "FlyingBottleStickyNote";
-	$dbname = "roi";
+	$dbhost = $_SERVER['ROI_DB_HOST'];
+	$dbuser = $_SERVER['ROI_DB_USER'];;
+	$dbpass = $_SERVER['ROI_DB_PASS'];;
+	$dbname = $_SERVER['ROI_DB_NAME'];;
 	$db = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
 	if($db->connect_error) {
 		$error = $db->connect_error;
@@ -25,6 +25,21 @@
 				$selector = "";
 			}
 			echo "<option value=\"$i\"$selector>$i</option>";
+		}
+	}
+	
+	//Function for sanitizing inputs
+	function check($input, $numeric, $db) {
+		if(is_numeric($input)) {
+			return $input;
+		} else {
+			if($numeric) {
+				if($input != '') {
+					die("Invalid input. Non-number entered for a numeric field"); 
+				}
+			}
+			$str = $db->real_escape_string($input);
+			return $str;
 		}
 	}
 ?>
