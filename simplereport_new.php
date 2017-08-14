@@ -22,11 +22,12 @@
 
 <html lang="en">
 	<head>
-	<title>Datatest</title>
+	<title>TRLN ROI Simple Report</title>
 	<meta charset="utf-8">
 	<link href="mystyles.css" rel="stylesheet" type="text/css">
 	</head>
 	<body>
+		<h1><img src="includes/trln.png" width=254 height=106 alt="TRLN"> ROI Simple Report by Joseph Leonardi</h1>
 		<form method="get" action="<?= $_SERVER['PHP_SELF']; ?>">
 		  <p>
 			<label for="startYear">Starting Year:</label>
@@ -145,6 +146,7 @@
 			<tr>
 				<?php
 					if(!$_GET) {
+						
 						die("Make a selection, then hit 'Go' to display the data");
 					}
 					if($sort == "Library") {
