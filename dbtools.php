@@ -1,6 +1,11 @@
 <?php
+	/*
+		TRLN ROI Database Reporting Project, Database Report Helper
+		Include For 'simplereport_new.php'
+		Author: Joseph Leonardi
+	*/
+
 	//Info for roi_user test account
-	//TODO: Switch to env variables
 	$dbhost = $_SERVER['ROI_DB_HOST'];
 	$dbuser = $_SERVER['ROI_DB_USER'];;
 	$dbpass = $_SERVER['ROI_DB_PASS'];;

@@ -1,5 +1,8 @@
 <?php
-
+	/*
+		TRLN ROI Database Reporting Project, Simple Database Report
+		Author: Joseph Leonardi
+	*/
 	try {
 		require_once "includes/dbtools.php";
 	} catch(Exception $e) {
@@ -43,7 +46,7 @@
 			</select>
 		  </p>
 		  <p>
-			<label for="minCost">Minimum Cost:</label>
+			<label for="minCost">Minimum TRLN Cost:</label>
 			<input type="text" name="minCost" id="minCost"
 				<?php
 					if($_GET) {						
@@ -53,7 +56,7 @@
 				>
 		  </p>
 		  <p>
-			<label for="maxCost">Maximum Cost:</label>
+			<label for="maxCost">Maximum TRLN Cost:</label>
 			<input type="text" name="maxCost" id="maxCost"
 				<?php
 					if($_GET) {						
@@ -72,6 +75,15 @@
 			</select>
 		  </p>
 		  <p>
+			<label for="sort">Group Results By:</label>
+			<select name="sort" id="sort">
+				<?php
+					$sortby = ["Consortium", "Library"];
+					create_menu($sortby, 'sort', "Consortium");
+				?>
+			</select>
+		  </p>
+		  <p>
 			<input type="submit" name="start" id="start" value="Go">
 		  </p>
 		</form>
@@ -84,10 +96,14 @@
 			$minCost = check($_GET['minCost'], true, $db);
 			$maxCost = check($_GET['maxCost'], true, $db);
 			$provider = check($_GET['provider'], false, $db);
-			//echo($startYear . " " . $endYear . " " . $minCost . " " . $maxCost . " " . $provider . "</br>");
+			$sort = check($_GET['sort'], false, $db);
+			if($sort != "Consortium" && $sort != "Library") {
+				die("Invalid group-by input. (Stop being sneaky and use the menu!)");
+			}
+			//echo($startYear . " " . $endYear . " " . $minCost . " " . $maxCost . " " . $provider . " " . $sort . "</br>");
 			
 			//Base MySQL query string
-			$query = "SELECT * FROM totalsummaryconsortium";
+			$query = "SELECT * FROM totalsummary$sort";
 			//Parameter input for query, select by year
 			if($endYear - $startYear >= 0) {
 				$query .= " WHERE TRLN_Year >= {$startYear} AND TRLN_Year <= {$endYear}";
@@ -112,6 +128,7 @@
 				die("Invalid year range");
 			}
 			try {
+				//print_r($query);
 				$result = $db->query($query);
 				if(!$result) {
 					die("Database query failed");
@@ -126,26 +143,35 @@
 		?>
 		<table>
 			<tr>
+				<?php
+					if(!$_GET) {
+						die("Make a selection, then hit 'Go' to display the data");
+					}
+					if($sort == "Library") {
+						echo "<th>TRLN_LibraryName</th>";
+					}
+				?>
 				<th>TRLN_Year</th>
 				<th>Total_TRLN_Cost</th>
 				<th>Total_PUB_Price</th>
-				<th>Discount_Total_Consortium</th>
-				<th>Discount_Percentage_Consortium</th>
-				<th>CostPerUse_Consortium</th>
-				<th>CostPerTitle_Consortium</th>
-				<th>UsePerTitle_Consortium</th>
+				<th>Discount_Total_<?php echo $sort; ?></th>
+				<th>Discount_Percentage_<?php echo $sort; ?></th>
+				<th>CostPerUse_<?php echo $sort; ?></th>
+				<th>CostPerTitle_<?php echo $sort; ?></th>
+				<th>UsePerTitle_<?php echo $sort; ?></th>
 				<th>SERSOL_ProvName</th>
 			</tr>
 			<?php if($_GET) { while($row = $result->fetch_assoc()) { ?>
 				<tr>
+					<?php if($sort == "Library") {echo "<td>" . $row["TRLN_LibraryName"] . "</td>";} ?>
 					<td><?php echo $row["TRLN_Year"]; ?></td>
 					<td><?php echo $row["Total_TRLN_Cost"]; ?></td>
 					<td><?php echo $row["Total_PUB_Price"]; ?></td>
-					<td><?php echo $row["Discount_Total_Consortium"]; ?></td>
-					<td><?php echo $row["Discount_Percentage_Consortium"]; ?></td>
-					<td><?php echo $row["CostPerUse_Consortium"]; ?></td>
-					<td><?php echo $row["CostPerTitle_Consortium"]; ?></td>
-					<td><?php echo $row["UsePerTitle_Consortium"]; ?></td>
+					<td><?php echo $row["Discount_Total_$sort"]; ?></td>
+					<td><?php echo $row["Discount_Percentage_$sort"]; ?></td>
+					<td><?php echo $row["CostPerUse_$sort"]; ?></td>
+					<td><?php echo $row["CostPerTitle_$sort"]; ?></td>
+					<td><?php echo $row["UsePerTitle_$sort"]; ?></td>
 					<td><?php echo $row["SERSOL_ProvName"]; ?></td>
 				</tr>
 			<?php } } ?>
